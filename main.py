@@ -11,6 +11,7 @@ Last Update :
 
 from torch.utils.data import Dataset
 from torchvision import transforms
+import torch
 import os
 import sys
 import pandas as pd
@@ -71,5 +72,11 @@ imgDataset = MyDataset(input_file_path, ROOT_DIR, transform=transforms.Compose([
     transforms.ToTensor(),
     MyNormalize()
     ]))
+
+
+# split data
+train_size = int(0.8 * len(imgDataset))
+test_size = len(imgDataset) - train_size
+train_dataset, test_dataset = torch.utils.data.random_split(imgDataset, [train_size, test_size])
 
 # print(imgDataset)
