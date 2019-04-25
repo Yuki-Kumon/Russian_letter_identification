@@ -74,9 +74,16 @@ imgDataset = MyDataset(input_file_path, ROOT_DIR, transform=transforms.Compose([
     ]))
 
 
-# split data
+# split dataset
 train_size = int(0.8 * len(imgDataset))
 test_size = len(imgDataset) - train_size
-train_dataset, test_dataset = torch.utils.data.random_split(imgDataset, [train_size, test_size])
+train_data, test_data = torch.utils.data.random_split(imgDataset, [train_size, test_size])
 
-# print(imgDataset)
+# create dataloader
+train_loader = torch.utils.data.DataLoader(train_data, batch_size=64, shuffle=True)
+test_loader = torch.utils.data.DataLoader(test_data, batch_size=100, shuffle=True)
+
+
+
+image_test = cv2.imread('./data/letters2/33_223.png')
+print(image_test.shape)
