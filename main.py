@@ -63,9 +63,13 @@ class MyNormalize:
 
 
 # file path settings
+input_file_path = './data/letters2/letters2.csv'
+ROOT_DIR = './data/letters2/'
 
 # create Dataset
 imgDataset = MyDataset(input_file_path, ROOT_DIR, transform=transforms.Compose([
     transforms.ToTensor(),
     MyNormalize()
     ]))
+
+# print(imgDataset)
