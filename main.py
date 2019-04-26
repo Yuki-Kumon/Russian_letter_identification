@@ -33,8 +33,11 @@ LABEL_IDX = 1
 IMG_IDX = 2
 
 # file path settings
-input_file_path = '/Users/yuki_kumon/Documents/python/Russian_letter_identification/data/letters2/letters2.csv'
-ROOT_DIR = '/Users/yuki_kumon/Documents/python/Russian_letter_identification/data/letters2/'
+cwd = os.getcwd()
+# input_file_path = '/Users/yuki_kumon/Documents/python/Russian_letter_identification/data/letters2/letters2.csv'
+# ROOT_DIR = '/Users/yuki_kumon/Documents/python/Russian_letter_identification/data/letters2/'
+input_file_path = os.path.join(cwd, 'data/letters2/letters2.csv')
+ROOT_DIR = os.path.join(cwd, 'data/letters2/')
 
 
 # define dataset
