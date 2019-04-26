@@ -2,6 +2,9 @@
 
 """
 ロシア語の手書き文字をニューラルネットで学習する練習。
+[参考]
+https://qiita.com/mckeeeen/items/e255b4ac1efba88d0ca1
+https://qiita.com/sheep96/items/0c2c8216d566f58882aa
 Author :
     Yuki Kumon
 Last Update :
@@ -29,6 +32,7 @@ input_file_path = './data/letters2/letters2.csv'
 ROOT_DIR = './data/letters2/'
 
 
+# define dataset
 class MyDataset(Dataset):
     '''
     dataset class
@@ -85,8 +89,10 @@ class Net(nn.Module):
         self.fc2 = nn.Linear(100, 34)
 
     def forward(self, x):
-        x = F.relu(F.max_pool2d(self.conv1(x), 2))
-        x = F.relu(F.max_pool2d(self.conv2_drop(self.conv2(x)), 2))
+        # x = F.relu(F.max_pool2d(self.conv1(x), 2))
+        # x = F.relu(F.max_pool2d(self.conv2_drop(self.conv2(x)), 2))
+        # 入力→畳み込み層1→活性化関数→プーリング層1
+        x = F.max_pool2d(F.relu(self.conv1(x)), 2)
         x = x.view(-1, 500)
         x = F.relu(self.fc1(x))
         x = F.dropout(x, training=self.training)
@@ -110,6 +116,10 @@ train_data, test_data = torch.utils.data.random_split(imgDataset, [train_size, t
 train_loader = torch.utils.data.DataLoader(train_data, batch_size=64, shuffle=True)
 test_loader = torch.utils.data.DataLoader(test_data, batch_size=100, shuffle=True)
 
+# create network
+net = Net()
 
+"""
 image_test = cv2.imread('./data/letters2/33_223.png')
-print(image_test.shape)
+print(image_test)
+"""
