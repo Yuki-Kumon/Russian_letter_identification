@@ -23,7 +23,7 @@ import torch.utils.data  # データセット読み込み関連
 from torch.utils.data.sampler import SubsetRandomSampler  # データセット分割
 # from torch.autograd import Variable
 import os
-import sys
+# import sys
 import pandas as pd
 # import cv2
 from PIL import Image
