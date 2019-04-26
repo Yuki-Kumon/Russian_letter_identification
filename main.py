@@ -100,7 +100,7 @@ class Net(nn.Module):
         # →畳み込み層2→活性化関数→プーリング層2
         x = F.max_pool2d(F.relu(self.conv2(x)), 2)
         # 全結合層に渡すためにデータを1次元に変換
-        x = x.view(-1, 500)
+        x = x.view(-1, self.num_flat_features(x))
         # 全結合層1→活性化関数
         x = F.relu(self.fc1(x))
         # 全結合層2に渡す前にドロップアウト(今回は省略)
@@ -108,6 +108,33 @@ class Net(nn.Module):
         # 全結合層2→ソフトマックス関数
         x = F.log_softmax(self.fc2(x), dim=1)
         return x
+
+    def num_flat_features(self,x):
+        #Conv2dは入力を4階のテンソルとして保持する(サンプル数*チャネル数*縦の長さ*横の長さ)
+        #よって、特徴量の数を数える時は[1:]でスライスしたものを用いる
+        size=x.size()[1:]
+        #特徴量の数=チャネル数*縦の長さ*横の長さを計算する
+        num_features=1
+        for s in size:
+            num_features*=s
+        return num_features
+
+
+def my_collate_fn(batch):
+    '''
+    self define collate_fn
+    '''
+    # datasetの出力が
+    # [image, target] = dataset[batch_idx]
+    # の場合.
+    images = []
+    targets = []
+    for sample in batch:
+        image, target = sample
+        images.append(image)
+        targets.append(targets)
+    images = torch.stack(images, dim=0)
+    return [images, targets]
 
 
 # create Dataset
@@ -133,6 +160,8 @@ train_sampler = SubsetRandomSampler(train_indices)
 valid_sampler = SubsetRandomSampler(val_indices)
 
 # create dataloader
+# train_loader = torch.utils.data.DataLoader(imgDataset, batch_size=64, sampler=train_sampler, collate_fn=my_collate_fn)
+# test_loader = torch.utils.data.DataLoader(imgDataset, batch_size=100, sampler=valid_sampler, collate_fn=my_collate_fn)
 train_loader = torch.utils.data.DataLoader(imgDataset, batch_size=64, sampler=train_sampler)
 test_loader = torch.utils.data.DataLoader(imgDataset, batch_size=100, sampler=valid_sampler)
 # hoge_loader = torch.utils.data.DataLoader(imgDataset, batch_size=64, shuffle=True)
