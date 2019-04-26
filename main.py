@@ -111,14 +111,14 @@ class Net(nn.Module):
         x = F.log_softmax(self.fc2(x), dim=1)
         return x
 
-    def num_flat_features(self,x):
-        #Conv2dは入力を4階のテンソルとして保持する(サンプル数*チャネル数*縦の長さ*横の長さ)
-        #よって、特徴量の数を数える時は[1:]でスライスしたものを用いる
-        size=x.size()[1:]
-        #特徴量の数=チャネル数*縦の長さ*横の長さを計算する
-        num_features=1
+    def num_flat_features(self, x):
+        # Conv2dは入力を4階のテンソルとして保持する(サンプル数*チャネル数*縦の長さ*横の長さ)
+        # よって、特徴量の数を数える時は[1:]でスライスしたものを用いる
+        size = x.size()[1:]
+        # 特徴量の数=チャネル数*縦の長さ*横の長さを計算する
+        num_features = 1
         for s in size:
-            num_features*=s
+            num_features *= s
         return num_features
 
 
@@ -223,6 +223,9 @@ for epoch in range(1, 1000 + 1):
     train(epoch)
     test()
 
+# save
+PATH = '/Users/yuki_kumon/Documents/python/Russian_letter_identification/'
+torch.save(model.state_dict(), PATH)
 
 """
 image_test = cv2.imread('./data/letters2/33_223.png')
