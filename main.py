@@ -18,6 +18,7 @@ import torch.nn as nn  # ネットワーク構築用
 import torch.optim as optim  # 最適化関数
 import torch.nn.functional as F  # ネットワーク用の様々な関数
 import torch.utils.data  # データセット読み込み関連
+from torch.autograd import Variable
 import os
 import sys
 import pandas as pd
@@ -28,8 +29,8 @@ LABEL_IDX = 1
 IMG_IDX = 2
 
 # file path settings
-input_file_path = './data/letters2/letters2.csv'
-ROOT_DIR = './data/letters2/'
+input_file_path = '/Users/yuki_kumon/Documents/python/Russian_letter_identification/data/letters2/letters2.csv'
+ROOT_DIR = '/Users/yuki_kumon/Documents/python/Russian_letter_identification/data/letters2/'
 
 
 # define dataset
@@ -126,6 +127,49 @@ test_loader = torch.utils.data.DataLoader(test_data, batch_size=100, shuffle=Tru
 model = Net()
 optimizer = optim.SGD(model.parameters(), lr=0.01, momentum=0.5)
 criterion = nn.CrossEntropyLoss()
+
+
+def train(epoch):
+    '''
+    training function
+    '''
+    model.train()
+    for batch_idx, (image, label) in enumerate(train_loader):
+        # Variable型への変換(統合されたので省略)
+        image, label = Variable(image), Variable(label)
+        optimizer.zero_grad()
+        output = model(image)
+        loss = criterion(output, label)
+        loss.backward()
+        optimizer.step()
+
+        print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
+            epoch, batch_idx * len(image), len(train_loader.dataset),
+            100. * batch_idx / len(train_loader), loss.data[0]))
+
+
+def test():
+    '''
+    function for test
+    '''
+    model.eval()
+    for (image, label) in test_loader:
+        # Variable型への変換(統合されたので省略)
+        # image, label = Variable(image.float(), volatile=True), Variable(label)
+        output = model(image)
+        test_loss += criterion(output, label).data[0]  # sum up batch loss
+        pred = output.data.max(1, keepdim=True)[1]  # get the index of the max log-probability
+        correct += pred.eq(label.data.view_as(pred)).long().cpu().sum()
+
+    test_loss /= len(test_loader.dataset)
+    print('\nTest set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'.format(
+        test_loss, correct, len(test_loader.dataset),
+        100. * correct / len(test_loader.dataset)))
+
+
+# exac
+for i in test_loader:
+    print(i)
 
 """
 image_test = cv2.imread('./data/letters2/33_223.png')
