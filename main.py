@@ -5,6 +5,8 @@
 [参考]
 https://qiita.com/mckeeeen/items/e255b4ac1efba88d0ca1
 https://qiita.com/sheep96/items/0c2c8216d566f58882aa
+[Dataset]
+https://www.kaggle.com/olgabelitskaya/classification-of-handwritten-letters
 Author :
     Yuki Kumon
 Last Update :
@@ -84,7 +86,7 @@ class Net(nn.Module):
     def __init__(self):
         super(Net, self).__init__()
         # 畳み込み層(サンプル数、チャネル数、窓のサイズ)
-        self.conv1 = nn.Conv2d(4, 10, kernel_size=5)
+        self.conv1 = nn.Conv2d(3, 10, kernel_size=5)
         self.conv2 = nn.Conv2d(10, 20, kernel_size=5)
         self.conv2_drop = nn.Dropout2d()
         self.fc1 = nn.Linear(500, 100)
@@ -114,9 +116,8 @@ imgDataset = MyDataset(input_file_path, ROOT_DIR, transform=transforms.Compose([
     MyNormalize()
     ]))
 
-
 # Creating data indices for training and validation splits:
-validation_split = .2
+validation_split = 0.2
 shuffle_dataset = True
 random_seed = 42
 dataset_size = len(imgDataset)
@@ -134,7 +135,7 @@ valid_sampler = SubsetRandomSampler(val_indices)
 # create dataloader
 train_loader = torch.utils.data.DataLoader(imgDataset, batch_size=64, sampler=train_sampler)
 test_loader = torch.utils.data.DataLoader(imgDataset, batch_size=100, sampler=valid_sampler)
-hoge_loader = torch.utils.data.DataLoader(imgDataset, batch_size=64, shuffle=True)
+# hoge_loader = torch.utils.data.DataLoader(imgDataset, batch_size=64, shuffle=True)
 
 # prepare for train
 model = Net()
@@ -158,7 +159,7 @@ def train(epoch):
 
         print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
             epoch, batch_idx * len(image), len(train_loader.dataset),
-            100. * batch_idx / len(train_loader), loss.data[0]))
+            100. * batch_idx / len(train_loader), loss.item()))
 
 
 def test():
