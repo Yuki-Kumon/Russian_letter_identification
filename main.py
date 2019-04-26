@@ -93,11 +93,17 @@ class Net(nn.Module):
         # x = F.relu(F.max_pool2d(self.conv2_drop(self.conv2(x)), 2))
         # 入力→畳み込み層1→活性化関数→プーリング層1
         x = F.max_pool2d(F.relu(self.conv1(x)), 2)
+        # →畳み込み層2→活性化関数→プーリング層2
+        x = F.max_pool2d(F.relu(self.conv2(x)), 2)
+        # 全結合層に渡すためにデータを1次元に変換
         x = x.view(-1, 500)
+        # 全結合層1→活性化関数
         x = F.relu(self.fc1(x))
-        x = F.dropout(x, training=self.training)
-        x = self.fc2(x)
-        return F.log_softmax(x, dim=1)
+        # 全結合層2に渡す前にドロップアウト(今回は省略)
+        # x = F.dropout(x, training=self.training)
+        # 全結合層2→ソフトマックス関数
+        x = F.log_softmax(self.fc2(x), dim=1)
+        return x
 
 
 # create Dataset
@@ -116,8 +122,10 @@ train_data, test_data = torch.utils.data.random_split(imgDataset, [train_size, t
 train_loader = torch.utils.data.DataLoader(train_data, batch_size=64, shuffle=True)
 test_loader = torch.utils.data.DataLoader(test_data, batch_size=100, shuffle=True)
 
-# create network
-net = Net()
+# prepare for train
+model = Net()
+optimizer = optim.SGD(model.parameters(), lr=0.01, momentum=0.5)
+criterion = nn.CrossEntropyLoss()
 
 """
 image_test = cv2.imread('./data/letters2/33_223.png')
