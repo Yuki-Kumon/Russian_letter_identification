@@ -25,7 +25,8 @@ from torch.utils.data.sampler import SubsetRandomSampler  # データセット�
 import os
 import sys
 import pandas as pd
-import cv2
+# import cv2
+from PIL import Image
 import numpy as np
 
 LABEL_IDX = 1
@@ -59,14 +60,14 @@ class MyDataset(Dataset):
         img_name = os.path.join(self.root_dir, self.image_dataframe.iat[idx, IMG_IDX])
         # 画像の読み込み
         # image = io.imread(img_name)
-        image = cv2.imread(img_name)
+        image = Image.open(img_name)
         # 画像へ処理を加える
         if self.transform:
             image = self.transform(image)
-
         return image, label
 
 
+"""
 class MyNormalize:
     '''
     self define normalize
@@ -79,6 +80,7 @@ class MyNormalize:
         shape = image.shape
         image = (image - torch.mean(image)) / torch.std(image) * 16 + 64
         return image
+"""
 
 
 # define my network
@@ -86,7 +88,7 @@ class Net(nn.Module):
     def __init__(self):
         super(Net, self).__init__()
         # 畳み込み層(サンプル数、チャネル数、窓のサイズ)
-        self.conv1 = nn.Conv2d(3, 10, kernel_size=5)
+        self.conv1 = nn.Conv2d(4, 10, kernel_size=5)
         self.conv2 = nn.Conv2d(10, 20, kernel_size=5)
         self.conv2_drop = nn.Dropout2d()
         self.fc1 = nn.Linear(500, 100)
@@ -139,8 +141,9 @@ def my_collate_fn(batch):
 
 # create Dataset
 imgDataset = MyDataset(input_file_path, ROOT_DIR, transform=transforms.Compose([
+    transforms.Resize((32, 32)),
     transforms.ToTensor(),
-    MyNormalize()
+    transforms.Normalize((0.5, 0.5, 0.5, 0.5), (0.5, 0.5, 0.5, 0.5))
     ]))
 
 # Creating data indices for training and validation splits:
@@ -195,12 +198,15 @@ def test():
     '''
     testing function
     '''
+    # initialize
+    test_loss = 0.0
+    correct = 0.0
     model.eval()
     for (image, label) in test_loader:
         # Variable型への変換(統合されたので省略)
         # image, label = Variable(image.float(), volatile=True), Variable(label)
         output = model(image)
-        test_loss += criterion(output, label).data[0]  # sum up batch loss
+        test_loss += criterion(output, label).item()  # sum up batch loss
         pred = output.data.max(1, keepdim=True)[1]  # get the index of the max log-probability
         correct += pred.eq(label.data.view_as(pred)).long().cpu().sum()
 
