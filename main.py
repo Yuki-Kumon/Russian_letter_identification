@@ -52,8 +52,8 @@ class MyDataset(Dataset):
     def __getitem__(self, idx):
         # dataframeから画像へのパスとラベルを読み出す
         label = self.image_dataframe.iat[idx, LABEL_IDX]
-        img_name = os.path.join(self.root_dir, 'classification-of-handwritten-letters',
-                'letters2', self.image_dataframe.iat[idx, IMG_IDX])
+        # img_name = os.path.join(self.root_dir, 'classification-of-handwritten-letters','letters2', self.image_dataframe.iat[idx, IMG_IDX])
+        img_name = os.path.join(self.root_dir, self.image_dataframe.iat[idx, IMG_IDX])
         # 画像の読み込み
         # image = io.imread(img_name)
         image = cv2.imread(img_name)
@@ -74,7 +74,7 @@ class MyNormalize:
         write my transform here
         '''
         shape = image.shape
-        image = (image - np.mean(image)) / np.std(image) * 16 + 64
+        image = (image - torch.mean(image)) / torch.std(image) * 16 + 64
         return image
 
 
@@ -168,8 +168,8 @@ def test():
 
 
 # exac
-for i in test_loader:
-    print(i)
+for i in range(10):
+    print(imgDataset[i])
 
 """
 image_test = cv2.imread('./data/letters2/33_223.png')
