@@ -122,6 +122,7 @@ class Net(nn.Module):
         return num_features
 
 
+"""
 def my_collate_fn(batch):
     '''
     self define collate_fn
@@ -137,6 +138,7 @@ def my_collate_fn(batch):
         targets.append(targets)
     images = torch.stack(images, dim=0)
     return [images, targets]
+"""
 
 
 # create Dataset
