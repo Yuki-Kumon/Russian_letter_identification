@@ -18,7 +18,8 @@ import torch.nn as nn  # ネットワーク構築用
 import torch.optim as optim  # 最適化関数
 import torch.nn.functional as F  # ネットワーク用の様々な関数
 import torch.utils.data  # データセット読み込み関連
-from torch.autograd import Variable
+from torch.utils.data.sampler import SubsetRandomSampler  # データセット分割
+# from torch.autograd import Variable
 import os
 import sys
 import pandas as pd
@@ -114,14 +115,26 @@ imgDataset = MyDataset(input_file_path, ROOT_DIR, transform=transforms.Compose([
     ]))
 
 
-# split dataset
-train_size = int(0.8 * len(imgDataset))
-test_size = len(imgDataset) - train_size
-train_data, test_data = torch.utils.data.random_split(imgDataset, [train_size, test_size])
+# Creating data indices for training and validation splits:
+validation_split = .2
+shuffle_dataset = True
+random_seed = 42
+dataset_size = len(imgDataset)
+indices = list(range(dataset_size))
+split = int(np.floor(validation_split * dataset_size))
+if shuffle_dataset:
+    np.random.seed(random_seed)
+    np.random.shuffle(indices)
+train_indices, val_indices = indices[split:], indices[:split]
+
+# Creating PT data samplers and loaders:
+train_sampler = SubsetRandomSampler(train_indices)
+valid_sampler = SubsetRandomSampler(val_indices)
 
 # create dataloader
-train_loader = torch.utils.data.DataLoader(train_data, batch_size=64, shuffle=True)
-test_loader = torch.utils.data.DataLoader(test_data, batch_size=100, shuffle=True)
+train_loader = torch.utils.data.DataLoader(imgDataset, batch_size=64, sampler=train_sampler)
+test_loader = torch.utils.data.DataLoader(imgDataset, batch_size=100, sampler=valid_sampler)
+hoge_loader = torch.utils.data.DataLoader(imgDataset, batch_size=64, shuffle=True)
 
 # prepare for train
 model = Net()
@@ -136,7 +149,7 @@ def train(epoch):
     model.train()
     for batch_idx, (image, label) in enumerate(train_loader):
         # Variable型への変換(統合されたので省略)
-        image, label = Variable(image), Variable(label)
+        # image, label = Variable(image), Variable(label)
         optimizer.zero_grad()
         output = model(image)
         loss = criterion(output, label)
@@ -150,7 +163,7 @@ def train(epoch):
 
 def test():
     '''
-    function for test
+    testing function
     '''
     model.eval()
     for (image, label) in test_loader:
@@ -168,8 +181,10 @@ def test():
 
 
 # exac
-for i in range(10):
-    print(imgDataset[i])
+for epoch in range(1, 1000 + 1):
+    train(epoch)
+    test()
+
 
 """
 image_test = cv2.imread('./data/letters2/33_223.png')
