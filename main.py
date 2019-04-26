@@ -227,8 +227,8 @@ for epoch in range(1, 1000 + 1):
     test()
 
 # save
-PATH = '/Users/yuki_kumon/Documents/python/Russian_letter_identification/'
-torch.save(model.state_dict(), PATH)
+# PATH = '/Users/yuki_kumon/Documents/python/Russian_letter_identification/'
+torch.save(model.state_dict(), cwd)
 
 """
 image_test = cv2.imread('./data/letters2/33_223.png')
