@@ -10,7 +10,7 @@ https://www.kaggle.com/olgabelitskaya/classification-of-handwritten-letters
 Author :
     Yuki Kumon
 Last Update :
-    2019-04-26
+    2019-04-27
 """
 
 
@@ -176,6 +176,9 @@ test_loader = torch.utils.data.DataLoader(imgDataset, batch_size=100, sampler=va
 
 # prepare for train
 model = Net()
+if(1):
+    PATH = os.path.join(cwd, 'model')
+    model.load_state_dict(torch.load(PATH))
 optimizer = optim.SGD(model.parameters(), lr=0.01, momentum=0.5)
 criterion = nn.CrossEntropyLoss()
 
@@ -217,18 +220,19 @@ def test():
 
     test_loss /= len(test_loader.dataset)
     print('\nTest set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'.format(
-        test_loss, correct, len(test_loader.dataset),
-        100. * correct / len(test_loader.dataset)))
+        test_loss, correct, int(len(test_loader.dataset) * validation_split),
+        100. * correct / (len(test_loader.dataset) * validation_split)))
 
 
 # exac
-for epoch in range(1, 1000 + 1):
+for epoch in range(1, 100 + 1):
     train(epoch)
     test()
 
 # save
 # PATH = '/Users/yuki_kumon/Documents/python/Russian_letter_identification/'
-torch.save(model.state_dict(), cwd)
+PATH = os.path.join(cwd, 'model')
+torch.save(model.state_dict(), PATH)
 
 """
 image_test = cv2.imread('./data/letters2/33_223.png')
