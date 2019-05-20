@@ -29,6 +29,12 @@ import pandas as pd
 from PIL import Image
 import numpy as np
 
+# from torch.utils.tensorboard import SummaryWriter
+from tensorboardX import SummaryWriter
+
+TENSOR_BOARD_LOG_DIR = './tensorboard_log'
+writer = SummaryWriter(log_dir=TENSOR_BOARD_LOG_DIR)
+
 LABEL_IDX = 1
 IMG_IDX = 2
 
@@ -170,7 +176,7 @@ valid_sampler = SubsetRandomSampler(val_indices)
 # create dataloader
 # train_loader = torch.utils.data.DataLoader(imgDataset, batch_size=64, sampler=train_sampler, collate_fn=my_collate_fn)
 # test_loader = torch.utils.data.DataLoader(imgDataset, batch_size=100, sampler=valid_sampler, collate_fn=my_collate_fn)
-train_loader = torch.utils.data.DataLoader(imgDataset, batch_size=64, sampler=train_sampler)
+train_loader = torch.utils.data.DataLoader(imgDataset, batch_size=16, sampler=train_sampler)
 test_loader = torch.utils.data.DataLoader(imgDataset, batch_size=100, sampler=valid_sampler)
 # hoge_loader = torch.utils.data.DataLoader(imgDataset, batch_size=64, shuffle=True)
 
@@ -188,21 +194,26 @@ def train(epoch):
     training function
     '''
     model.train()
+    total_loss = 0.0
     for batch_idx, (image, label) in enumerate(train_loader):
         # Variable型への変換(統合されたので省略)
         # image, label = Variable(image), Variable(label)
         optimizer.zero_grad()
         output = model(image)
         loss = criterion(output, label)
+        total_loss += loss.item()
         loss.backward()
         optimizer.step()
 
+        """
         print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
             epoch, batch_idx * len(image), len(train_loader.dataset),
             100. * batch_idx / len(train_loader), loss.item()))
+        """
+    writer.add_scalar("loss", total_loss, epoch)
 
 
-def test():
+def test(epoch):
     '''
     testing function
     '''
@@ -219,15 +230,16 @@ def test():
         correct += pred.eq(label.data.view_as(pred)).long().cpu().sum()
 
     test_loss /= len(test_loader.dataset)
+    writer.add_scalar("Accuracy", 100. * correct / (len(test_loader.dataset) * validation_split), epoch)
     print('\nTest set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'.format(
         test_loss, correct, int(len(test_loader.dataset) * validation_split),
         100. * correct / (len(test_loader.dataset) * validation_split)))
 
 
 # exac
-for epoch in range(1, 100 + 1):
+for epoch in range(1, 10 + 1):
     train(epoch)
-    test()
+    test(epoch)
 
 # save
 # PATH = '/Users/yuki_kumon/Documents/python/Russian_letter_identification/'
